@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoelStore POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* 2. TEMA & UI/UX (NIKE VIBE: Bold, Clean, Sporty) */
+        :root {
+            --black: #111111;
+            --white: #FFFFFF;
+            --gray: #F5F5F5;
+            --dark-gray: #707070;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            overflow-x: hidden;
+        }
+
+        /* 3. ANIMASI OPENING (SPLASH SCREEN) */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: var(--white);
+        }
+
+        .floating-apparel {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite;
+            /* Placeholder transparan jika tidak ada gambar lokal */
+            filter: drop-shadow(0px 10px 10px rgba(255, 255, 255, 0.2));
+        }
+
+        #splash-screen h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* MAIN CONTENT */
+        #main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--black);
+            margin-bottom: 30px;
+        }
+
+        header h2 {
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        /* PRODUCT GRID */
+        .catalog {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background-color: var(--gray);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-card:hover {
+            background-color: #e5e5e5;
+        }
+
+        .img-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .product-img {
+            width: 80%;
+            height: auto;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.15); /* Hover effect dinamis */
+        }
+
+        .product-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            font-weight: 400;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+        }
+
+        .btn-add {
+            background-color: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: opacity 0.3s;
+        }
+
+        .btn-add:hover {
+            opacity: 0.8;
+        }
+
+        /* CART & CHECKOUT SECTION */
+        .cart-section {
+            background-color: var(--black);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .cart-section h3 {
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .cart-items {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .btn-checkout {
+            background-color: var(--white);
+            color: var(--black);
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* MODALS (PAYMENT & RECEIPT) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-content h3 {
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-weight: 900;
+        }
+
+        .input-money {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid var(--black);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+        }
+
+        .btn-pay {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        /* FORMAT NOTA PEMBAYARAN (Infor 2) */
+        .receipt-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border: 1px dashed var(--dark-gray);
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-close {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-weight: 900;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        
+        .error-msg {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splash-screen">
+        <!-- SVG Baju/Jaket Transparan untuk Animasi Floating -->
+        <svg class="floating-apparel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+        </svg>
+        <h1>NoelStore</h1>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content" style="display: none;">
+        <header>
+            <h2>NoelStore</h2>
+            <div style="font-weight: 700;">POS SYSTEM</div>
+        </header>
+
+        <!-- 4. ALUR: PILIH DAFTAR MENU -->
+        <div class="catalog" id="product-catalog">
+            <!-- Rendered by JS -->
+        </div>
+
+        <div class="cart-section">
+            <h3>Keranjang</h3>
+            <ul class="cart-items" id="cart-items-list">
+                <!-- Rendered by JS -->
+            </ul>
+            <div class="cart-total">
+                <span>TOTAL</span>
+                <span id="cart-total-price">Rp 0</span>
+            </div>
+            <button class="btn-checkout" onclick="openPaymentModal()">Checkout</button>
+        </div>
+    </div>
+
+    <!-- 4. ALUR: BAYAR (Modal) -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal-content">
+            <h3>Proses Pembayaran</h3>
+            <div style="margin-bottom: 15px;">Total: <strong id="pay-total-display">Rp 0</strong></div>
+            <div class="error-msg" id="pay-error">Uang tidak cukup!</div>
+            <input type="number" id="input-cash" class="input-money" placeholder="Masukkan jumlah uang (Rp)">
+            <button class="btn-pay" onclick="processPayment()">Bayar</button>
+        </div>
+    </div>
+
+    <!-- 4 & 6. ALUR: FINISH & FORMAT NOTA (Modal) -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-content">
+            <h3 style="text-align: center;">NoelStore Receipt</h3>
+            <div class="receipt-text" id="receipt-content">
+                <!-- Rendered by JS mengikuti format Infor 2 -->
+            </div>
+            <button class="btn-close" onclick="resetApp()">Tutup & Transaksi Baru</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. LOGIKA JAVASCRIPT ANTI-BUG UNTUK SPLASH SCREEN
+        window.addEventListener('DOMContentLoaded', () => {
+            // Setelah tepat 3 detik, paksa pindah ke main-content
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                const main = document.getElementById('main-content');
+                splash.style.display = 'none';
+                main.style.display = 'block';
+            }, 3000);
+        });
+
+        // 5. DAFTAR HARGA ITEM BAJU
+        const products = [
+            { id: 1, name: 'Kaos Oversize Noel', price: 150000 },
+            { id: 2, name: 'Hoodie Premium Noel', price: 350000 },
+            { id: 3, name: 'Jaket Parasut Noel', price: 450000 },
+            { id: 4, name: 'Celana Cargo Noel', price: 250000 }
+        ];
+
+        let cart = [];
+        let totalBelanja = 0;
+
+        // Fungsi format Rupiah
+        const formatRp = (angka) => {
+            return 'Rp ' + angka.toLocaleString('id-ID');
+        };
+
+        // Render Katalog Produk
+        const renderCatalog = () => {
+            const catalogDiv = document.getElementById('product-catalog');
+            catalogDiv.innerHTML = '';
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                // Dummy ikon grafis sederhana untuk pengganti foto produk agar rapi
+                card.innerHTML = `
+                    <div class="img-container">
+                        <svg class="product-img" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.38 3.46L16 2a8.5 8.5 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+                        </svg>
+                    </div>
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-price">${formatRp(product.price)}</div>
+                    <button class="btn-add" onclick="addToCart(${product.id})">Tambah</button>
+                `;
+                catalogDiv.appendChild(card);
+            });
+        };
+
+        // Tambah ke Keranjang
+        const addToCart = (id) => {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
+        };
+
+        // Update UI Keranjang
+        const updateCartUI = () => {
+            const list = document.getElementById('cart-items-list');
+            const totalDisplay = document.getElementById('cart-total-price');
+            
+            list.innerHTML = '';
+            totalBelanja = 0;
+
+            cart.forEach(item => {
+                totalBelanja += item.price;
+                const li = document.createElement('li');
+                li.className = 'cart-item';
+                li.innerHTML = `<span>${item.name}</span> <span>${formatRp(item.price)}</span>`;
+                list.appendChild(li);
+            });
+
+            totalDisplay.innerText = formatRp(totalBelanja);
+        };
+
+        // Buka Modal Bayar
+        const openPaymentModal = () => {
+            if (cart.length === 0) {
+                alert("Keranjang kosong. Pilih barang terlebih dahulu.");
+                return;
+            }
+            document.getElementById('pay-total-display').innerText = formatRp(totalBelanja);
+            document.getElementById('payment-modal').style.display = 'flex';
+            document.getElementById('pay-error').style.display = 'none';
+            document.getElementById('input-cash').value = '';
+        };
+
+        // Proses Pembayaran dan Validasi Uang
+        const processPayment = () => {
+            const cashInput = parseInt(document.getElementById('input-cash').value);
+            const errorMsg = document.getElementById('pay-error');
+
+            if (isNaN(cashInput) || cashInput < totalBelanja) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const kembalian = cashInput - totalBelanja;
+            generateReceipt(cashInput, kembalian);
+        };
+
+        // 6. FORMAT NOTA PEMBAYARAN PERSIS SEPERTI INFOR 2
+        const generateReceipt = (uang, kembalian) => {
+            document.getElementById('payment-modal').style.display = 'none';
+            
+            const receiptDiv = document.getElementById('receipt-content');
+            let itemsHtml = '';
+            
+            cart.forEach(item => {
+                itemsHtml += `
+                <div class="receipt-row">
+                    <span>${item.name}</span>
+                    <span>${formatRp(item.price)}</span>
+                </div>`;
+            });
+
+            receiptDiv.innerHTML = `
+                <div class="receipt-row" style="margin-bottom:10px; font-weight:bold;">
+                    <span>Uraian pembelian</span>
+                </div>
+                ${itemsHtml}
+                <hr style="margin: 10px 0; border: 0.5px dashed #707070;">
+                <div class="receipt-row">
+                    <span>Total</span>
+                    <span>${formatRp(totalBelanja)}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Uang</span>
+                    <span>${formatRp(uang)}</span>
+                </div>
+                <div class="receipt-row" style="font-weight:bold; margin-top:5px;">
+                    <span>Kembalian</span>
+                    <span>${formatRp(kembalian)}</span>
+                </div>
+            `;
+
+            document.getElementById('receipt-modal').style.display = 'flex';
+        };
+
+        // Reset Aplikasi untuk Transaksi Baru
+        const resetApp = () => {
+            cart = [];
+            updateCartUI();
+            document.getElementById('receipt-modal').style.display = 'none';
+        };
+
+        // Inisialisasi awal saat load
+        renderCatalog();
+
+    </script>
+</body>
+</html>
